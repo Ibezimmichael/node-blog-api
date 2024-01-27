@@ -25,7 +25,6 @@ const userSchema = mongoose.Schema({
     },
     bio: {
         type: String,
-        required: [true, 'Last Name is required']
     },
     postCount: {
         type: Number,
@@ -43,26 +42,26 @@ const userSchema = mongoose.Schema({
         type: String,
         enum: ['Admin', 'Guest', 'Editor'],
     },
-    viewedBy: {
+    viewedBy: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-    },
-    followers: {
+    }],
+    followers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-    },
-    following: {
+    }],
+    following: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-    },
+    }],
     active: {
         type: Boolean,
         default: true,
     },
-    posts: {
+    posts: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Post",
-    },  
+    }],  
 }, {
     timestamps: true,
 });

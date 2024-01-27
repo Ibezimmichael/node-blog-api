@@ -10,6 +10,9 @@ connectDb()
 
 const port = process.env.PORT || 5000;
 
+app.use(express.urlencoded({extended: true}))
+app.use(express.json())
+
 // users route
 app.use('/api/users/', users);
 
@@ -22,9 +25,6 @@ app.use('/api/comments/', comments);
 // categories route
 
 app.use('/api/categories/', categories);
-
-
-
 
 
 
