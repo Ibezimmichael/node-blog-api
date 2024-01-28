@@ -6,6 +6,7 @@ const posts = require('./routes/post');
 const comments = require('./routes/comment');
 const categories = require('./routes/category');
 const connectDb = require('./config/dbConnection');
+const errorHandler = require('./middlewares/errorHandler');
 connectDb()
 
 const port = process.env.PORT || 5000;
@@ -27,6 +28,11 @@ app.use('/api/comments/', comments);
 app.use('/api/categories/', categories);
 
 
+app.use(errorHandler);
+
+app.use('*', (req, res) => {
+    res.status(404).json({message: `${req.originalUrl} Route Not found`})
+})
 
 
 

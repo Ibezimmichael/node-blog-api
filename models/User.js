@@ -26,10 +26,10 @@ const userSchema = mongoose.Schema({
     bio: {
         type: String,
     },
-    postCount: {
-        type: Number,
-        default: 0,
-    },
+    // postCount: {
+    //     type: Number,
+    //     default: 0,
+    // },
     isBlocked: {
         type: Boolean,
         default: false,
@@ -42,7 +42,7 @@ const userSchema = mongoose.Schema({
         type: String,
         enum: ['Admin', 'Guest', 'Editor'],
     },
-    viewedBy: [{
+    viewers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     }],
@@ -54,14 +54,27 @@ const userSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     }],
-    active: {
-        type: Boolean,
-        default: true,
-    },
+    // active: {
+    //     type: Boolean,
+    //     default: true,
+    // },
     posts: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Post",
-    }],  
+    }],
+    blocked: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        }
+    ],
+    plan: [
+        {
+            type: String,
+            enum: ['Free', 'Premium', 'Pro'],
+            default: 'Free',
+        }
+    ]
 }, {
     timestamps: true,
 });

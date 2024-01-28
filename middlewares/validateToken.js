@@ -5,10 +5,14 @@ const authenticateToken = async (req, res, next) => {
         const authHeader = req.headers.authorization || req.headers.Authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ message: 'Missing or invalid Authorization header' });
+            // throw new Error('Missing or invalid Authorization header')
         }
 
         const token = authHeader.split(' ')[1];
         const decoded = await jwt.verify(token, process.env.JWT_KEY);
+
+        //  save user into req obj
+        req.userAuth = decoded.id
 
         // Additional validation (if needed):
         // - Check token expiration
