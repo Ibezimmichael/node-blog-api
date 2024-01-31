@@ -67,34 +67,48 @@ const profile = async (req, res) => {
 
 const profileViewers = async (req, res) => {
     try {
-      //1. Find the original
-      const user = await User.findById(req.params.id);
-      //2. Find the user who viewed the original user
-      const userWhoViewed = await User.findById(req.userAuth);
-  
-      //3.Check if original and who viewd are found
-      if (user && userWhoViewed) {
-        //4. check if userWhoViewed is already in the users viewers array
-        const isUserAlreadyViewed = user.viewers.find(
-          viewer => viewer.toString() === userWhoViewed._id.toJSON()
-        );
-        if (isUserAlreadyViewed) {
-          return next(appErr("You already viewed this profile"));
+        const user = await User.findById(req.params.id);
+        const userWhoViewed = await User.findById(req.userAuth);
+
+        if (user && userWhoViewed) {
+            const isUserAlreadyViewed = user.viewers.find(
+                viewer => viewer.toString() === userWhoViewed._id.toString()
+            );
+            if (isUserAlreadyViewed) {
+                // Send a response indicating that the profile has already been viewed
+                return res.status(400).json({
+                    status: "error",
+                    message: 'You already viewed this profile'
+                });
+            } else {
+                user.viewers.push(userWhoViewed._id);
+                await user.save();
+                return res.json({
+                    status: "success",
+                    message: "You have successfully viewed this profile"
+                });
+            }
         } else {
-          //5. Push the userWhoViewed to the user's viewers array
-          user.viewers.push(userWhoViewed._id);
-          //6. Save the user
-          await user.save();
-          res.json({
-            status: "success",
-            data: "You have successfully viewed this profile",
-          });
+            // Send a response indicating that either the user or the viewer was not found
+            return res.status(404).json({
+                status: "error",
+                message: "User or viewer not found"
+            });
         }
-      }
     } catch (error) {
-      next(appErr(error.message));
+        // Handle other unexpected errors
+        console.error("Error in profileViewers:", error);
+        return res.status(500).json({
+            status: "error",
+            message: "Internal server error"
+        });
     }
-  };
+};
+
+
+//follow
+
+
 
 const getUsers = async (req, res) => {
     try {
@@ -154,7 +168,7 @@ const uploadPhoto = async (req, res) => {
                 status: "success",
                 data: "You have successfully updated your profile photo",
             });
-        }        
+        }
     } catch (error) {
         res.status(500);
         throw new Error(error.message);
@@ -171,5 +185,5 @@ module.exports = {
     updateUser,
     deleteUser,
     uploadPhoto,
-    profileViewers
+    profileViewers,
 };
