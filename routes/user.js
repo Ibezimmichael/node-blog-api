@@ -19,6 +19,7 @@ router.get('/', getUsers);
 router.get('/profile-viewers/:id', validateToken, profileViewers);
 
 router.post("/follow/:id", validateToken, follow);
+router.post("/unfollow/:id", validateToken, unFollow);
 
 router.route('/:id').put(updateUser).delete(deleteUser);
 
