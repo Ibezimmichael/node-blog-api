@@ -77,7 +77,45 @@ const userSchema = mongoose.Schema({
     ]
 }, {
     timestamps: true,
+    toJSON: { virtuals: true },
 });
+
+// full name
+userSchema.virtual('fullname').get(function () {
+    console.log(this);
+    return `${this.firstname} ${this.lastname}`
+});
+
+// initials
+userSchema.virtual('initials').get(function () {
+    return `${this.firstname[0].toUpperCase()}${this.lastname[0].toUpperCase()}`
+});
+
+
+// post count
+userSchema.virtual('postCount').get(function () {
+    return this.posts.length;
+});
+
+userSchema.virtual("followersCount").get(function () {
+    return this.followers.length;
+});
+
+//get followers count
+userSchema.virtual("followingCount").get(function () {
+    return this.following.length;
+});
+
+//get viewers count
+userSchema.virtual("viewersCount").get(function () {
+    return this.viewers.length;
+});
+
+//get blocked count
+userSchema.virtual("blockedCount").get(function () {
+    return this.blocked.length;
+});
+
 
 
 module.exports = mongoose.model("User", userSchema);

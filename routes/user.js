@@ -8,6 +8,7 @@ const { follow, unFollow } = require('../controllers/userFollowController');
 const { block, unblock } = require('../controllers/userBlockController');
 const isAdmin = require('../middlewares/isAdmin');
 const { adminBlock, adminUnblock } = require('../controllers/adminUserActionsController');
+const { updatePassword } = require('../controllers/userProfileController');
 const upload = multer({storage});
 
 router.post('/register', register);
@@ -18,7 +19,9 @@ router.get('/profile',validateToken, profile);
 
 router.get('/', getUsers);
 
+// profile management
 router.get('/profile-viewers/:id', validateToken, profileViewers);
+router.post('/update-password', validateToken, updatePassword);
 
 
 // follow router

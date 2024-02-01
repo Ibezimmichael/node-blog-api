@@ -112,7 +112,8 @@ const profileViewers = async (req, res) => {
 
 const getUsers = async (req, res) => {
     try {
-        res.status(201).json({ message: "Users", data: "correct" })
+        const users = await User.find()
+        res.status(201).json({ message: "Users", data: users })
 
     } catch (error) {
         res.status(400).json(error.message)
