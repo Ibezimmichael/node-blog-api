@@ -5,6 +5,7 @@ const storage = require('../config/cloudinary');
 const router = express.Router();
 const multer = require('multer');
 const { follow, unFollow } = require('../controllers/userFollowController');
+const { block, unblock } = require('../controllers/userBlockController');
 
 const upload = multer({storage});
 
@@ -18,8 +19,14 @@ router.get('/', getUsers);
 
 router.get('/profile-viewers/:id', validateToken, profileViewers);
 
+
+// follow router
 router.post("/follow/:id", validateToken, follow);
 router.post("/unfollow/:id", validateToken, unFollow);
+
+// block router
+router.post("/block/:id", validateToken, block);
+router.post("/unblock/:id", validateToken, unblock)
 
 router.route('/:id').put(updateUser).delete(deleteUser);
 
