@@ -10,7 +10,6 @@ const isAdmin = require('../middlewares/isAdmin');
 const { adminBlock, adminUnblock } = require('../controllers/adminUserActionsController');
 const { updatePassword, uploadPhoto, profile } = require('../controllers/userProfileController');
 const upload = multer({storage});
-uploadPhoto
 
 router.post('/register', register);
 
