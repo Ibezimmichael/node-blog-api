@@ -46,6 +46,9 @@ const updateCategory = async (req, res) => {
     const { name, description } = req.body;
     try {
         const cat= await Category.findById(req.params.id);
+        if (cat.user.toString() !== req.userAuth.toString()) {
+            return next(appErr("You are not allowed to update this category", 403));
+        }
         const category = await Category.findByIdAndUpdate(
             req.params.id,
             { name, description },
@@ -64,6 +67,10 @@ const updateCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
   try {
+    const cat= await Category.findById(req.params.id);
+        if (cat.user.toString() !== req.userAuth.toString()) {
+            return next(appErr("You are not allowed to delete this category", 403));
+        }
     await Category.findByIdAndDelete(req.params.id);
     res.json({
       status: "success",

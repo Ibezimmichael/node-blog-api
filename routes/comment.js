@@ -1,12 +1,15 @@
 const express = require('express');
-const { getAllComments, createComment, updateComment, deleteComment } = require('../controllers/commentContoller');
+const { createComment, updateComment, deleteComment } = require('../controllers/commentContoller');
+const validateToken = require('../middlewares/validateToken');
+
 const router = express.Router();
 
 
+// create comment 
+// post id required
+router.route('/:id').post(validateToken, createComment);
 
-router.route('/').get(getAllComments).post(createComment);
-
-router.route('/:id').put(updateComment).delete(deleteComment);
+router.route('/:id').put(validateToken, updateComment).delete(validateToken, deleteComment);
 
 
 
