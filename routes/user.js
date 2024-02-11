@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, register, profile, getUsers, updateUser, deleteUser, uploadPhoto, profileViewers } = require('../controllers/userController');
+const { login, register, getUsers, updateUser, deleteUser, profileViewers } = require('../controllers/userController');
 const validateToken = require('../middlewares/validateToken');
 const storage = require('../config/cloudinary');
 const router = express.Router();
@@ -8,8 +8,9 @@ const { follow, unFollow } = require('../controllers/userFollowController');
 const { block, unblock } = require('../controllers/userBlockController');
 const isAdmin = require('../middlewares/isAdmin');
 const { adminBlock, adminUnblock } = require('../controllers/adminUserActionsController');
-const { updatePassword } = require('../controllers/userProfileController');
+const { updatePassword, uploadPhoto, profile } = require('../controllers/userProfileController');
 const upload = multer({storage});
+uploadPhoto
 
 router.post('/register', register);
 
@@ -38,7 +39,7 @@ router.post("/admin-block/:id", validateToken, isAdmin, adminBlock);
 router.post("/admin-unblock/:id", validateToken, isAdmin, adminUnblock);
 
 
-router.route('/:id').put(updateUser).delete(deleteUser);
+router.route('/').put(validateToken, updateUser).delete(validateToken, deleteUser);
 
 router.post('/photo-upload', validateToken, upload.single('profile'),  uploadPhoto)
 

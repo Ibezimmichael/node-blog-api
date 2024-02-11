@@ -1,14 +1,41 @@
+const Post = require("../models/Post");
+const asyncHandler = require('express-async-handler');
+const User = require("../models/User");
+const { appErr, AppErr } = require("../utils/appErr");
 
 
-const createPost = async(req, res) => {
+
+
+
+const createPost = async (req, res, next) => {
+    const { title, description, category } = req.body;
     try {
-        res.status(201).json({message: "Post created", data: "correct"})
-        
+      //Find the user
+      const author = await User.findById(req.userAuth);
+      //check if the user is blocked
+      if (author.isBlocked) {
+        return next(appErr("Access denied, account blocked", 403));
+      }
+      //Create the post
+      const postCreated = await Post.create({
+        title,
+        description,
+        user: author._id,
+        category,
+        photo: req?.file?.path,
+      });
+      //Associate user to a post -Push the post into the user posts field
+      author.posts.push(postCreated);
+      //save
+      await author.save();
+      res.json({
+        status: "success",
+        data: postCreated,
+      });
     } catch (error) {
-        res.status(400).json(error.message)
-        
+      next(appErr(error.message));
     }
-};
+  };
 
 
 const getAllPost = async(req, res) => {

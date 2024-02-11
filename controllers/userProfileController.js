@@ -3,7 +3,17 @@ const User = require('../models/User');
 const bcrypt = require("bcrypt");
 const { appErr, AppErr } = require("../utils/appErr");
 
+const profile = async (req, res) => {
+    try {
+        const user = await User.findById(req.userAuth)
+        res.status(201).json({ message: "User profile", data: user })
 
+    } catch (error) {
+        // console.log(error);
+        throw new Error(error)
+
+    }
+};
 
 const updatePassword = asyncHandler(async (req, res, next) => {
     const { oldPassword, newPassword } = req.body;
@@ -46,6 +56,46 @@ const updatePassword = asyncHandler(async (req, res, next) => {
 
 
 
+
+
+const uploadPhoto = async (req, res) => {
+    try {
+        const user = await User.findById(req.userAuth);
+        // check for user
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found')
+        }
+        // check is user is blocked
+        if (user.isBlocked) {
+            res.json(402);
+            throw new Error('Your account has been suspended')
+        }
+        // check if user is updating their photo
+        if (req.file) {
+            await User.findByIdAndUpdate(req.userAuth, {
+                $set: {
+                    profilePhoto: req.file.path,
+                },
+            }, {
+                new: true,
+            });
+            res.json({
+                status: "success",
+                data: "You have successfully updated your profile photo",
+            });
+        }
+    } catch (error) {
+        res.status(500);
+        throw new Error(error.message);
+    }
+};
+
+
+
+
 module.exports = {
-    updatePassword
+    updatePassword,
+    uploadPhoto,
+    profile
 }

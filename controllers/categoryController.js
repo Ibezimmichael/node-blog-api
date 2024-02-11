@@ -1,56 +1,77 @@
+const Category = require("../models/Category");
+const { appErr, AppErr } = require("../utils/appErr");
 
 
-const createCategory = async(req, res) => {
+const createCategory = async (req, res, next) => {
+    const { name, description } = req.body;
     try {
-        res.status(201).json({message: "Category created", data: "correct"})
-        
+        const category = await Category.create({ name, description, user: req.userAuth });
+        res.json({
+            status: "success",
+            data: category,
+        });
     } catch (error) {
-        res.status(400).json(error.message)
-        
+        return next(appErr(error.message));
     }
 };
 
-const getAllCategories = async(req, res) => {
+const getAllCategories = async (req, res) => {
     try {
-        res.status(201).json({message: "All categories", data: "correct"})
-        
+        const categories = await Category.find();
+        res.json({
+            status: "success",
+            data: categories,
+        });
     } catch (error) {
-        res.status(400).json(error.message)
-        
-    }
-};
-
-
-const getSingleCategory = async(req, res) => {
-    try {
-        res.status(201).json({message: "get category", data: "correct"})
-        
-    } catch (error) {
-        res.status(400).json(error.message)
-        
+        res.json(error.message);
     }
 };
 
 
-const updateCategory = async(req, res) => {
+const getSingleCategory = async (req, res) => {
     try {
-        res.status(201).json({message: "Update categoriess", data: "correct"})
-        
+        const category = await Category.findById(req.params.id);
+        res.json({
+            status: "success",
+            data: category,
+        });
     } catch (error) {
-        res.status(400).json(error.message)
-        
+        res.json(error.message);
     }
 };
 
-const deleteCategory = async(req, res) => {
+
+//update
+const updateCategory = async (req, res) => {
+    const { name, description } = req.body;
     try {
-        res.status(201).json({message: "Delete categories", data: "correct"})
-        
+      const category = await Category.findByIdAndUpdate(
+        req.params.id,
+        { name, description },
+        { new: true, runValidators: true }
+      );
+      res.json({
+        status: "success",
+        data: category,
+      });
     } catch (error) {
-        res.status(400).json(error.message)
-        
+      res.json(error.message);
     }
 };
+
+
+
+const deleteCategory= async (req, res) => {
+    try {
+      await Category.findByIdAndDelete(req.params.id);
+      res.json({
+        status: "success",
+        data: "Deleted successfully",
+      });
+    } catch (error) {
+      res.json(error.message);
+    }
+  };
 
 
 module.exports = {

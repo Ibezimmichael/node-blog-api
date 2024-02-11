@@ -2,9 +2,14 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require("bcrypt");
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
+const { appErr, AppErr } = require("../utils/appErr");
+const Post = require("../models/Post");
+const Category = require("../models/Category");
+const Comment = require("../models/Comment");
+
 
 const register = asyncHandler(async (req, res) => {
-    const { firstname, lastname, email, password, profilePhoto } = req.body;
+    const { firstname, lastname, email, password } = req.body;
     if (!firstname || !lastname || !email || !password) {
         res.status(400);
         throw new Error("All fields are mandatory")
@@ -52,17 +57,7 @@ const login = asyncHandler(async (req, res) => {
 });
 
 
-const profile = async (req, res) => {
-    try {
-        const user = await User.findById(req.userAuth)
-        res.status(201).json({ message: "User profile", data: user })
 
-    } catch (error) {
-        // console.log(error);
-        throw new Error(error)
-
-    }
-};
 
 
 const profileViewers = async (req, res) => {
@@ -106,10 +101,6 @@ const profileViewers = async (req, res) => {
 };
 
 
-//follow
-
-
-
 const getUsers = async (req, res) => {
     try {
         const users = await User.find()
@@ -121,70 +112,78 @@ const getUsers = async (req, res) => {
     }
 };
 
-const updateUser = async (req, res) => {
+
+const updateUser = asyncHandler(async (req, res, next) => {
+    const { email, lastname, firstname } = req.body;
+
     try {
-        res.status(201).json({ message: "Update User", data: "correct" })
-
-    } catch (error) {
-        res.status(400).json(error.message)
-
-    }
-};
-
-const deleteUser = async (req, res) => {
-    try {
-        res.status(201).json({ message: "Delete User", data: "correct" })
-
-    } catch (error) {
-        res.status(400).json(error.message)
-
-    }
-};
-
-
-
-const uploadPhoto = async (req, res) => {
-    try {
-        const user = await User.findById(req.userAuth);
-        // check for user
-        if (!user) {
-            res.status(404);
-            throw new Error('User not found')
+        // Check if email is not taken
+        if (email) {
+            const emailTaken = await User.findOne({ email });
+            if (emailTaken) {
+                return next(appErr("Email is taken", 400));
+            }
         }
-        // check is user is blocked
-        if (user.isBlocked) {
-            res.json(402);
-            throw new Error('Your account has been suspended')
-        }
-        // check if user is updating their photo
-        if (req.file) {
-            await User.findByIdAndUpdate(req.userAuth, {
-                $set: {
-                    profilePhoto: req.file.path,
-                },
-            }, {
+
+        // Update the user
+        const user = await User.findByIdAndUpdate(
+            req.userAuth,
+            {
+                lastname,
+                firstname,
+                email,
+            },
+            {
                 new: true,
-            });
-            res.json({
-                status: "success",
-                data: "You have successfully updated your profile photo",
-            });
-        }
+                runValidators: true,
+            }
+        );
+
+        // Send success response
+        res.json({
+            status: "success",
+            data: user,
+        });
     } catch (error) {
-        res.status(500);
-        throw new Error(error.message);
+        // Handle any errors that occur during the update operation
+        return next(appErr(error.message || "Internal Server Error", 500));
+    }
+});
+
+
+
+const deleteUser = async (req, res, next) => {
+    try {
+        //1. Find the user to be deleted
+        const userTodelete = await User.findById(req.userAuth);
+        // console.log(userTodelete);
+        //2. find all posts to be deleted
+        await Post.deleteMany({ user: req.userAuth });
+        //3. Delete all comments of the user
+        await Comment.deleteMany({ user: req.userAuth });
+        //4. Delete all category of the user
+        await Category.deleteMany({ user: req.userAuth });
+        //5. delete
+        await userTodelete.deleteOne();
+        //send response
+        return res.json({
+            status: "success",
+            data: "Your account has been deleted successfully",
+        });
+    } catch (error) {
+        next(appErr(error.message));
     }
 };
+
+
 
 
 
 module.exports = {
     register,
     login,
-    profile,
     getUsers,
     updateUser,
     deleteUser,
-    uploadPhoto,
     profileViewers,
 };
